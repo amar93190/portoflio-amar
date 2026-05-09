@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { gsap } from 'gsap'
 import { TypeAnimation } from 'react-type-animation'
@@ -12,6 +12,16 @@ export default function Hero() {
   const lineRef = useRef()
   const scrollRef = useRef()
   const isReady = useSiteStore((s) => s.isReady)
+  const [canvasActive, setCanvasActive] = useState(true)
+
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      ([entry]) => setCanvasActive(entry.isIntersecting),
+      { threshold: 0 }
+    )
+    if (heroRef.current) io.observe(heroRef.current)
+    return () => io.disconnect()
+  }, [])
 
   useEffect(() => {
     if (!isReady) return
@@ -87,6 +97,7 @@ export default function Hero() {
       >
         <Canvas
           camera={{ position: [0, 0, 8], fov: 60 }}
+          frameloop={canvasActive ? 'always' : 'demand'}
           style={{ width: '100%', height: '100%' }}
         >
           <ambientLight intensity={0.5} />
@@ -162,9 +173,10 @@ export default function Hero() {
         <h1
           className="hero-name"
           style={{
+            fontFamily: 'Zenjirou, Inter, sans-serif',
             fontSize: 'clamp(52px, 8vw, 120px)',
-            fontWeight: 700,
-            letterSpacing: '-2px',
+            fontWeight: 'normal',
+            letterSpacing: '2px',
             lineHeight: 0.9,
             color: '#F2F2F0',
             margin: 0,

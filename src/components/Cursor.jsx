@@ -58,24 +58,25 @@ export default function Cursor() {
       circle.style.marginLeft = '0'
     }
 
-    window.addEventListener('mousemove', onMouseMove)
-    rafId.current = requestAnimationFrame(animate)
-
-    const addListeners = () => {
-      document.querySelectorAll('a, button, [data-cursor]').forEach((el) => {
-        el.addEventListener('mouseenter', onEnter)
-        el.addEventListener('mouseleave', onLeave)
-      })
+    // Event delegation — mouseover/mouseout bubble unlike mouseenter/mouseleave
+    const onOver = (e) => {
+      if (e.target.closest('a, button, [data-cursor]')) onEnter()
     }
-    addListeners()
+    const onOut = (e) => {
+      if (e.target.closest('a, button, [data-cursor]') &&
+          !e.relatedTarget?.closest('a, button, [data-cursor]')) onLeave()
+    }
 
-    const observer = new MutationObserver(addListeners)
-    observer.observe(document.body, { childList: true, subtree: true })
+    window.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseover', onOver)
+    document.addEventListener('mouseout', onOut)
+    rafId.current = requestAnimationFrame(animate)
 
     return () => {
       window.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseover', onOver)
+      document.removeEventListener('mouseout', onOut)
       cancelAnimationFrame(rafId.current)
-      observer.disconnect()
     }
   }, [])
 

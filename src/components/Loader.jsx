@@ -57,6 +57,7 @@ export default function Loader() {
         document.body.style.overflow = ''
         window.scrollTo(0, 0)
         setReady()
+        if (videoRef.current) { videoRef.current.pause(); videoRef.current.src = '' }
         if (loaderRef.current) loaderRef.current.style.display = 'none'
       },
     })
@@ -155,11 +156,11 @@ export default function Loader() {
 
           {/* Main title */}
           <h1 style={{
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'Zenjirou, Inter, sans-serif',
             fontSize: 'clamp(28px, 5vw, 56px)',
-            fontWeight: 700,
+            fontWeight: 'normal',
             color: '#F2F2F0',
-            letterSpacing: '-0.5px',
+            letterSpacing: '3px',
             textAlign: 'center',
             margin: 0,
             lineHeight: 1.1,

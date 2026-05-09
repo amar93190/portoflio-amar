@@ -110,10 +110,11 @@ export default function About() {
               </div>
               <h2
                 style={{
+                  fontFamily: 'Norij, Inter, sans-serif',
                   fontSize: 'clamp(36px, 4vw, 52px)',
-                  fontWeight: 700,
+                  fontWeight: 'normal',
                   color: '#F2F2F0',
-                  letterSpacing: '-1px',
+                  letterSpacing: '1px',
                   lineHeight: 1.1,
                   margin: 0,
                 }}

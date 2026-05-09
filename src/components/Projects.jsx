@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { ArrowUpRight, GitBranch } from 'lucide-react'
@@ -62,14 +62,14 @@ const PROJECTS = [
   },
 ]
 
-function ProjectCard({ project, index, isDragging }) {
-  const hexToRgb = (hex) => {
-    const r = parseInt(hex.slice(1, 3), 16)
-    const g = parseInt(hex.slice(3, 5), 16)
-    const b = parseInt(hex.slice(5, 7), 16)
-    return `${r},${g},${b}`
-  }
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `${r},${g},${b}`
+}
 
+function ProjectCard({ project, index, isDragging }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 30 }}
@@ -77,23 +77,17 @@ function ProjectCard({ project, index, isDragging }) {
       viewport={{ once: true, amount: 0.05 }}
       transition={{ duration: 0.6, delay: index * 0.08, ease: 'easeOut' }}
       whileHover={isDragging ? {} : { y: -6 }}
+      className="project-card-item"
       style={{
+        '--project-color': project.color,
         flexShrink: 0,
         width: '360px',
         background: 'var(--surface)',
         border: '1px solid var(--border)',
         position: 'relative',
         overflow: 'hidden',
-        transition: 'border-color 0.4s',
         userSelect: 'none',
         pointerEvents: isDragging ? 'none' : 'auto',
-      }}
-      onHoverStart={(e) => {
-        if (isDragging) return
-        e.currentTarget.style.borderColor = `rgba(${hexToRgb(project.color)}, 0.4)`
-      }}
-      onHoverEnd={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(217,219,225,0.1)'
       }}
     >
       {/* Top accent bar */}
@@ -214,18 +208,21 @@ export default function Projects() {
 
   const { ref: headRef, inView } = useInView({ triggerOnce: true, threshold: 0.1 })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const track = trackRef.current
+    const container = containerRef.current
+    if (!track || !container) return
+
     const calc = () => {
-      const track = trackRef.current
-      const container = containerRef.current
-      if (!track || !container) return
-      const maxDrag = -(track.scrollWidth - container.offsetWidth + 0)
+      const maxDrag = -(track.scrollWidth - container.offsetWidth)
       setDragConstraints({ left: Math.min(maxDrag, 0), right: 0 })
     }
 
-    calc()
-    window.addEventListener('resize', calc)
-    return () => window.removeEventListener('resize', calc)
+    const ro = new ResizeObserver(calc)
+    ro.observe(track)
+    ro.observe(container)
+
+    return () => ro.disconnect()
   }, [])
 
   return (
@@ -249,10 +246,11 @@ export default function Projects() {
             </div>
             <h2
               style={{
+                fontFamily: 'Norij, Inter, sans-serif',
                 fontSize: 'clamp(36px, 4vw, 52px)',
-                fontWeight: 700,
+                fontWeight: 'normal',
                 color: '#F2F2F0',
-                letterSpacing: '-1px',
+                letterSpacing: '1px',
                 lineHeight: 1.1,
                 margin: 0,
               }}

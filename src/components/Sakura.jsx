@@ -6,6 +6,8 @@ const COUNT = 700
 export default function Sakura() {
   const pointsRef = useRef()
 
+  const elapsed = useRef(0)
+
   const { positions, particles } = useMemo(() => {
     const positions = new Float32Array(COUNT * 3)
     const particles = []
@@ -25,9 +27,10 @@ export default function Sakura() {
     return { positions, particles }
   }, [])
 
-  useFrame(({ clock }) => {
+  useFrame((_, delta) => {
     if (!pointsRef.current) return
-    const t = clock.getElapsedTime()
+    elapsed.current += delta
+    const t = elapsed.current
     const attr = pointsRef.current.geometry.attributes.position
 
     for (let i = 0; i < COUNT; i++) {
